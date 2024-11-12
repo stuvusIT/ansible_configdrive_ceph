@@ -1,2 +1,6 @@
 ---
-
+- name: Install configdrive mount helper
+  copy:
+    src: files/mount.configdrive
+    dest: /sbin/mount.configdrive
+    mode: 0755

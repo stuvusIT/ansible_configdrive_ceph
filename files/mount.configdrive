@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -eo pipefail
+
+serial=$1
+shift
+
+secretdir=$(mktemp -d)
+
+function cleanup() {
+    set +e
+    ! mountpoint -q "$secretdir" || umount "$secretdir"
+    rmdir "$secretdir"
+}
+trap cleanup EXIT
+
+mount "/dev/disk/by-id/$serial" "$secretdir" -o ro
+
+type=$(<"$secretdir/type")
+fs=$(<"$secretdir/fs")
+name=$(<"$secretdir/name")
+spec=$(<"$secretdir/spec")
+
+if [[ $type != ceph ]]; then
+    >&2 echo Error: types other than ceph are currently not supported
+    exit 1
+fi
+
+mount -t "$type" "$spec" -o "fs=$fs,name=$name,secretfile=$secretdir/secretfile.file" "$@"

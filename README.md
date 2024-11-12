@@ -1,42 +1,30 @@
-# Role Name
+# configdrive_mount_helper
 
-A brief description of the role goes here.
+Ansible role that installs a custom mount helper that mounts a CephFS using credentials given via a config drive.
+(In the future, types other than CephFS might be supported.)
 
+Using this mount helper, one can simply run
+
+```bash
+mount -t configdrive <ID> /mnt -o _netdev
+```
+
+to mount a CephFS under `/mnt`.
+To make this work, the credentials must be passed as a block device under `/dev/disk/by-id/<ID>`.
+That block device must contain a filesystem with the following files on the root level:
+
+| Filename          | Content                                                                   |
+| ----------------- | ------------------------------------------------------------------------- |
+| `type`            | Must contain the string `ceph`.                                           |
+| `spec`            | Mount source, e.g., `mons.ceph.example.com:/volumes/csi/csi-vol-foo/bar`. |
+| `fs`              | Name of the CephFS. This is passed to `-o fs=`.                           |
+| `name`            | Name of the Ceph client. This is passed to `-o name=`.                    |
+| `secretfile.file` | Secret of the Ceph client. This file is passed to `-o secretfile=`.       |
 
 ## Requirements
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here.
-For instance, if the role uses the EC2 module or depends on other Ansible roles, it may be a good idea to mention in this section that the boto package is required.
-
-
-## Role Variables
-
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role.
-Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
-Don't forget to indent the markdown table so it is readable even if not rendered.
-
-| Name       | Required/Default         | Description                                                                                        |
-|------------|:------------------------:|----------------------------------------------------------------------------------------------------|
-| `example1` | :heavy_check_mark:       | Lorem ipsum dolor sit amet, consetetur sadipscing elitr,                                           |
-| `example2` | :heavy_multiplication_x: | Sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. |
-| `example3` | `True`                   | Stet clita kasd gubergren                                                                          |
-| `example4` | `5`                      | No sea takimata sanctus est Lorem ipsum dolor sit amet.                                            |
-
-
-## Example
-
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-```yml
-```
-
+This role should work in pretty much any distribution that has an `/sbin` directory.
 
 ## License
 
 This work is licensed under the [MIT License](./LICENSE).
-
-
-## Author Information
-
-- [Author Name (nickname)](github profile) _givenname.familyname at stuvus.uni-stuttgart.de_
